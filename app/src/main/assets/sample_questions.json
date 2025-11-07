@@ -1,0 +1,10 @@
+{
+  "questions": [
+    {
+      "question": "What is the capital of France?",
+      "options": ["London", "Berlin", "Paris", "Madrid"],
+      "correctAnswer": 2,
+      "explanation": "Paris is the capital and largest city of France."
+    }
+  ]
+}

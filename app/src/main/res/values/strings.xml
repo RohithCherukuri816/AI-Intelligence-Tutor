@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">EduAI Tutor</string>
+    <string name="welcome_title">EduAI Tutor</string>
+    <string name="welcome_subtitle">Your Personal AI Learning Assistant</string>
+    <string name="start_learning">Start Learning</string>
+    <string name="chat_hint">Ask me anything...</string>
+    <string name="send">Send</string>
+    <string name="take_quiz">Take a Quiz</string>
+    <string name="progress">Progress</string>
+    <string name="settings">Settings</string>
+</resources>
