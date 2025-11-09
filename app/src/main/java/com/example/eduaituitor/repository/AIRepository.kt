@@ -9,7 +9,7 @@ import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 /**
- * Repository for handling AI interactions with Gemma 2B model
+ * Repository for handling AI interactions with RunAnywhere model
  * Uses RunAnywhere SDK via FirebenderService
  */
 class AIRepository(private val application: Application) {
@@ -17,7 +17,7 @@ class AIRepository(private val application: Application) {
     private val firebenderService = FirebenderService()
 
     /**
-     * Get AI response using Gemma 2B model
+     * Get AI response using RunAnywhere model
      * Falls back to sample responses if model isn't loaded
      */
     suspend fun getAIResponse(userMessage: String, chatHistory: List<ChatMessage>): String {
@@ -29,63 +29,63 @@ class AIRepository(private val application: Application) {
                 if (it.isUser) "Student: ${it.content}" else "Tutor: ${it.content}"
             }
 
-            Log.d("AIRepository", "Calling Gemma 2B model...")
+            Log.d("AIRepository", "Calling model...")
 
-            // Call Gemma 2B via FirebenderService
+            // Call RunAnywhere via FirebenderService
             val response = firebenderService.sendMessage(userMessage, context)
 
             // Check if response is an error or empty
             if (response.startsWith("Error:") || response.contains("Unable to generate")) {
-                Log.w("AIRepository", "Gemma model not ready, using fallback")
+                Log.w("AIRepository", "Model not ready, using fallback")
                 getFallbackResponse(userMessage)
             } else {
-                Log.d("AIRepository", "✓ Got response from Gemma: ${response.take(100)}...")
+                Log.d("AIRepository", "✓ Got response from model: ${response.take(100)}...")
                 response
             }
         } catch (e: Exception) {
-            Log.e("AIRepository", "Error calling Gemma model", e)
+            Log.e("AIRepository", "Error calling model", e)
             getFallbackResponse(userMessage)
         }
     }
 
     /**
-     * Generate quiz using Gemma 2B model
+     * Generate quiz using RunAnywhere model
      * Falls back to sample questions if model isn't loaded
      */
     suspend fun generateQuiz(topic: String): List<QuizQuestion> {
         Log.d("AIRepository", "Generating quiz for: $topic")
 
         return try {
-            Log.d("AIRepository", "Calling Gemma 2B for quiz generation...")
+            Log.d("AIRepository", "Calling model for quiz generation...")
 
-            // Call Gemma 2B to generate quiz
+            // Call RunAnywhere to generate quiz
             val quizText = firebenderService.generateQuiz(topic, 5)
 
             // Check if response is valid
             if (quizText.startsWith("Error:") || quizText.contains("Unable to generate")) {
-                Log.w("AIRepository", "Gemma model not ready for quiz, using fallback")
+                Log.w("AIRepository", "Model not ready for quiz, using fallback")
                 getSampleQuestions(topic)
             } else {
-                // Parse the quiz response from Gemma
-                Log.d("AIRepository", "Parsing quiz from Gemma response...")
+                // Parse the quiz response from model
+                Log.d("AIRepository", "Parsing quiz from model response...")
                 val questions = parseQuizFromGemma(quizText)
 
                 if (questions.isEmpty()) {
-                    Log.w("AIRepository", "Failed to parse Gemma quiz, using fallback")
+                    Log.w("AIRepository", "Failed to parse model quiz, using fallback")
                     getSampleQuestions(topic)
                 } else {
-                    Log.d("AIRepository", "✓ Got ${questions.size} questions from Gemma")
+                    Log.d("AIRepository", "✓ Got ${questions.size} questions from model")
                     questions
                 }
             }
         } catch (e: Exception) {
-            Log.e("AIRepository", "Error generating quiz with Gemma", e)
+            Log.e("AIRepository", "Error generating quiz with model", e)
             getSampleQuestions(topic)
         }
     }
 
     /**
-     * Parse quiz questions from Gemma's text response
+     * Parse quiz questions from model's text response
      * Expected format:
      * Q: Question text
      * A) Option 1
@@ -167,7 +167,7 @@ class AIRepository(private val application: Application) {
     }
 
     /**
-     * Fallback response when Gemma model is not available
+     * Fallback response when model is not available
      */
     private suspend fun getFallbackResponse(userMessage: String): String {
         // Add a small delay to simulate processing
@@ -178,9 +178,9 @@ class AIRepository(private val application: Application) {
         return when {
             userMessage.contains("hello", ignoreCase = true) ||
                     userMessage.contains("hi", ignoreCase = true) -> {
-                """Hello! I'm your AI tutor powered by Gemma 2B. I can help you learn any topic.
+                """Hello! I'm your AI tutor powered by RunAnywhere. I can help you learn any topic.
                 
-**Note**: The AI model is still loading. For now, I'm using fallback responses. Please wait a moment for the full AI to be ready!
+**Note**: The AI model is downloading and loading. This is your first launch. Please wait while the optimal model for your device downloads (2-5 minutes on Wi-Fi). You'll see a notification when ready!
                 
 Just ask me to explain something, like:
 • "Teach me about photosynthesis"
@@ -190,16 +190,16 @@ Just ask me to explain something, like:
 Would you like to start learning?"""
             }
             userMessage.contains("quiz", ignoreCase = true) -> {
-                "I'd be happy to create a quiz for you about $topic! The AI model is loading, so I'll use pre-made questions for now."
+                "I'd be happy to create a quiz for you about $topic! The model is loading, so I'll use pre-made questions for now."
             }
             else -> {
                 """I'd be happy to explain $topic!
 
-**Note**: I'm currently using fallback mode while the Gemma 2B model loads. Responses will be much better once it's ready!
+**Note**: I'm currently using fallback mode while the model loads. Responses will be much better once it's ready!
 
 ${getSampleExplanation(topic)}
 
-This is a foundational explanation. Once the AI model is loaded, I can provide:
+This is a foundational explanation. Once the model is loaded, I can provide:
 • More detailed explanations
 • Personalized examples
 • Interactive quizzes

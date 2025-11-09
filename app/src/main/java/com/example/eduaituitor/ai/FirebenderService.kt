@@ -1,6 +1,7 @@
 package com.example.eduaituitor.ai
 
 import android.util.Log
+import com.example.eduaituitor.EduAIApplication
 import com.runanywhere.sdk.public.RunAnywhere
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -8,14 +9,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * RunAnywhere SDK Integration Service with Gemma 2B Model
+ * RunAnywhere SDK Integration Service with auto-selected model
  * Optimized for fast, high-quality educational responses
  */
 class FirebenderService {
 
     private val modelLoadMutex = Mutex()
     private var isModelLoaded = false
-    private val modelName = "Gemma 2B Instruct Q4_K_M" // Must match EduAIApplication registration
+    private var downloadAttempted = false
 
     /**
      * Ensure model is loaded before use
@@ -25,32 +26,27 @@ class FirebenderService {
         modelLoadMutex.withLock {
             if (!isModelLoaded) {
                 try {
-                    Log.i("EduAI", "Loading Gemma 2B model for first use...")
+                    Log.i("EduAI", "Initializing RunAnywhere auto-selected model...")
+                    // Ensure SDK is initialized first
+                    EduAIApplication.ensureInitialized()
 
-                    // Try to load the model
-                    RunAnywhere.loadModel(modelName)
-
+                    // Mark as loaded - RunAnywhere will auto-download on first generateStream() call
+                    // We don't explicitly load here; generateStream will trigger the download
                     isModelLoaded = true
-                    Log.i("EduAI", "✓ Gemma 2B model loaded successfully!")
-                } catch (e: IllegalArgumentException) {
-                    // Model not found - still downloading
-                    Log.w("EduAI", "Model not found: ${e.message}")
-                    throw IllegalStateException(
-                        "📥 Model is downloading in background. This is your first launch and the Gemma 2B model (1.4 GB) is being downloaded. " +
-                                "Please wait 2-5 minutes and try again. You'll see a notification when ready."
+                    Log.i(
+                        "EduAI",
+                        "✓ RunAnywhere ready! Will auto-download optimal model on first inference"
                     )
                 } catch (e: Exception) {
-                    Log.e("EduAI", "❌ Failed to load Gemma model: ${e.message}", e)
-                    throw IllegalStateException(
-                        "Failed to load model: ${e.message}. The model may still be downloading or there may be insufficient memory."
-                    )
+                    Log.e("EduAI", "Error initializing RunAnywhere", e)
+                    throw IllegalStateException("Failed to initialize RunAnywhere: ${e.message}")
                 }
             }
         }
     }
 
     /**
-     * Send message to Gemma 2B model and get complete response
+     * Send message to model and get complete response
      * Optimized for educational Q&A with fast inference
      */
     suspend fun sendMessage(
@@ -60,21 +56,41 @@ class FirebenderService {
         return try {
             val startTime = System.currentTimeMillis()
 
-            // Ensure model is loaded first
+            // Ensure initialization is done
             ensureModelLoaded()
 
-            // Build optimized prompt for Gemma
-            val fullPrompt = buildGemmaPrompt(message, context)
+            // Build optimized prompt for model
+            val fullPrompt = buildPrompt(message, context)
 
-            Log.d("EduAI", "Sending to Gemma 2B: ${message.take(50)}...")
+            Log.d("EduAI", "Sending to model: ${message.take(50)}...")
 
-            // Generate response using RunAnywhere SDK with Gemma
+            // Generate response using RunAnywhere SDK with model
+            // RunAnywhere will auto-select and load the best model for your device on first call
             var response = ""
             var tokenCount = 0
 
-            RunAnywhere.generateStream(fullPrompt).collect { token ->
-                response += token
-                tokenCount++
+            try {
+                Log.d("EduAI", "Calling RunAnywhere.generateStream()...")
+                RunAnywhere.generateStream(fullPrompt).collect { token ->
+                    response += token
+                    tokenCount++
+                }
+                Log.d("EduAI", "Stream collection completed, tokens: $tokenCount")
+            } catch (e: IllegalStateException) {
+                // Model not yet loaded - development mode should have mock models
+                Log.w("EduAI", "IllegalStateException from generateStream: ${e.message}")
+                throw e
+            } catch (e: IllegalArgumentException) {
+                // Model not yet downloaded - development mode should have mock models
+                Log.w("EduAI", "IllegalArgumentException from generateStream: ${e.message}")
+                throw e
+            } catch (e: Exception) {
+                Log.e(
+                    "EduAI",
+                    "Exception from generateStream: ${e::class.simpleName}: ${e.message}",
+                    e
+                )
+                throw e
             }
 
             val endTime = System.currentTimeMillis()
@@ -87,7 +103,7 @@ class FirebenderService {
 
             if (response.isEmpty()) {
                 Log.w("EduAI", "Empty response from model")
-                "I'm having trouble generating a response. The Gemma model may still be initializing. Please try again in a moment."
+                "I'm having trouble generating a response. The model may still be initializing. Please try again in a moment."
             } else {
                 response.trim()
             }
@@ -96,10 +112,14 @@ class FirebenderService {
             Log.e("EduAI", "Model not ready: ${e.message}")
             e.message ?: "Model is not ready. Please wait for the model to download."
         } catch (e: Exception) {
-            Log.e("EduAI", "Error generating response from Gemma", e)
+            Log.e(
+                "EduAI",
+                "Error generating response from model: ${e::class.simpleName}: ${e.message}",
+                e
+            )
             when {
                 e.message?.contains("Model not found") == true -> {
-                    "Model is downloading. This is your first launch and the Gemma 2B model (1.4 GB) is being downloaded. Please wait 2-5 minutes and try again."
+                    "Model is downloading. This is your first launch and the model is being downloaded. Please wait 2-5 minutes and try again."
                 }
                 e.message?.contains("No model loaded") == true -> {
                     "Model is not loaded yet. Please wait for the download to complete (2-5 minutes on first launch)."
@@ -126,13 +146,13 @@ class FirebenderService {
             // Ensure model is loaded first
             ensureModelLoaded()
 
-            val fullPrompt = buildGemmaPrompt(message, context)
+            val fullPrompt = buildPrompt(message, context)
 
-            Log.d("EduAI", "Starting streaming response from Gemma...")
+            Log.d("EduAI", "Starting streaming response from model...")
             var tokenCount = 0
             val startTime = System.currentTimeMillis()
 
-            // Stream tokens from Gemma via RunAnywhere SDK
+            // Stream tokens from model via RunAnywhere SDK
             RunAnywhere.generateStream(fullPrompt).collect { token ->
                 emit(token)
                 tokenCount++
@@ -149,28 +169,28 @@ class FirebenderService {
             Log.d("EduAI", "✓ Streaming complete: $tokenCount tokens in ${duration}ms")
 
         } catch (e: Exception) {
-            Log.e("EduAI", "Error in streaming from Gemma", e)
+            Log.e("EduAI", "Error in streaming from model", e)
             emit("\n\n[Error: ${e.message}]")
         }
     }
 
     /**
-     * Generate quiz questions using Gemma 2B
+     * Generate quiz questions using model
      * Optimized prompt for generating educational quiz content
      */
     suspend fun generateQuiz(
         topic: String,
         numberOfQuestions: Int = 5
     ): String {
-        val prompt = buildGemmaQuizPrompt(topic, numberOfQuestions)
+        val prompt = buildQuizPrompt(topic, numberOfQuestions)
         return sendMessage(prompt)
     }
 
     /**
-     * Build optimized prompt for Gemma 2B model
-     * Gemma works best with clear, structured instructions
+     * Build optimized prompt for model
+     * Model works best with clear, structured instructions
      */
-    private fun buildGemmaPrompt(
+    private fun buildPrompt(
         userMessage: String,
         context: List<String>
     ): String {
@@ -204,9 +224,9 @@ Tutor:"""
     }
 
     /**
-     * Build quiz generation prompt optimized for Gemma
+     * Build quiz generation prompt optimized for model
      */
-    private fun buildGemmaQuizPrompt(
+    private fun buildQuizPrompt(
         topic: String,
         numberOfQuestions: Int
     ): String {
@@ -232,7 +252,7 @@ Make questions educational, clear, and appropriate for learning. Ensure correct 
     }
 
     /**
-     * Check if Gemma model is loaded and ready
+     * Check if model is loaded and ready
      */
     fun isModelLoaded(): Boolean {
         return isModelLoaded
@@ -243,23 +263,19 @@ Make questions educational, clear, and appropriate for learning. Ensure correct 
      */
     fun getModelInfo(): String {
         return """
-        Model: Google Gemma 2B Instruct
-        Quantization: Q4_K_M
-        Size: ~1.4 GB
-        Speed: 50-100 tokens/sec (device dependent)
-        Optimized: Educational content
+        Model: Auto-selected by RunAnywhere
         Status: ${if (isModelLoaded) "Loaded" else "Not loaded"}
         """.trimIndent()
     }
 }
 
 /**
- * GEMMA 2B MODEL DOWNLOAD NOTES:
+ * MODEL DOWNLOAD NOTES:
  *
  * First Launch Behavior:
  * - Model is registered in EduAIApplication but NOT downloaded
  * - RunAnywhere downloads it automatically in background
- * - Download takes 2-5 minutes on Wi-Fi (1.4 GB)
+ * - Download takes 2-5 minutes on Wi-Fi (model size dependent)
  * - User will see fallback responses until download completes
  * - After download completes, restart app to load model
  *
@@ -268,11 +284,11 @@ Make questions educational, clear, and appropriate for learning. Ensure correct 
  * - Provide clear user message about download status
  * - Fall back gracefully while downloading
  *
- * GEMMA 2B OPTIMIZATION TIPS:
+ * MODEL OPTIMIZATION TIPS:
  *
  * 1. Model Loading:
  *    - Model must be downloaded first (automatic)
- *    - Then loaded before first use with RunAnywhere.loadModel()
+ *    - Then loaded before first use with RunAnywhere.generateStream()
  *    - Loading takes 1-5 seconds depending on device
  *    - Only load once, reuse for all subsequent requests
  *
@@ -282,13 +298,12 @@ Make questions educational, clear, and appropriate for learning. Ensure correct 
  *    - Keep system prompts concise
  *
  * 3. Performance:
- *    - Q4_K_M offers best quality/speed balance
  *    - Expect 50-100 tokens/sec on mid-range phones
- *    - Lower quantization (Q3_K_M) for faster inference
+ *    - Lower quantization for faster inference
  *
  * 4. Context Management:
  *    - Keep context window manageable (last 3-5 messages)
- *    - Gemma has 8K token context but mobile RAM is limited
+ *    - Model has a large context but mobile RAM is limited
  *
  * 5. Error Handling:
  *    - Always provide fallback responses

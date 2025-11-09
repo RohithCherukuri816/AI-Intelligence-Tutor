@@ -26,6 +26,8 @@ import com.example.eduaituitor.ui.theme.*
 @Composable
 fun WelcomeScreen(
     onStartLearning: () -> Unit,
+    isDarkMode: Boolean,
+    onToggleDarkMode: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -199,6 +201,15 @@ fun WelcomeScreen(
                         }
                     }
 
+                    // Theme toggle card
+                    ThemeToggleCard(
+                        isDarkMode = isDarkMode,
+                        onToggleDarkMode = onToggleDarkMode,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp)
+                    )
+
                     // CTA Button with gradient and animation
                     BouncingIcon(enabled = true) {
                         Button(
@@ -312,11 +323,80 @@ private fun FeatureCard(
     }
 }
 
+@Composable
+private fun ThemeToggleCard(
+    isDarkMode: Boolean,
+    onToggleDarkMode: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                color = if (isDarkMode) GradientStart else GradientEnd
+            ) {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = if (isDarkMode) "Dark Mode" else "Light Mode",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "Tap to switch appearance",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            AssistChip(
+                onClick = onToggleDarkMode,
+                label = {
+                    Text(if (isDarkMode) "Light" else "Dark")
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                        contentDescription = null
+                    )
+                }
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun WelcomeScreenPreview() {
     EduAITuitorTheme {
-        WelcomeScreen(onStartLearning = {})
+        WelcomeScreen(
+            onStartLearning = {},
+            isDarkMode = false,
+            onToggleDarkMode = {}
+        )
     }
 }
 
@@ -328,6 +408,10 @@ fun WelcomeScreenPreview() {
 @Composable
 fun WelcomeScreenDarkPreview() {
     EduAITuitorTheme(darkTheme = true) {
-        WelcomeScreen(onStartLearning = {})
+        WelcomeScreen(
+            onStartLearning = {},
+            isDarkMode = true,
+            onToggleDarkMode = {}
+        )
     }
 }

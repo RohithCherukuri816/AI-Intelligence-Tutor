@@ -49,8 +49,11 @@ fun EduAIApp(viewModel: MainViewModel) {
     
     when (currentScreen) {
         is MainViewModel.Screen.Welcome -> {
+            val appSettings by viewModel.appSettings.collectAsState()
             WelcomeScreen(
-                onStartLearning = { viewModel.navigateTo(MainViewModel.Screen.Chat) }
+                onStartLearning = { viewModel.navigateTo(MainViewModel.Screen.Chat) },
+                isDarkMode = appSettings.isDarkMode,
+                onToggleDarkMode = { viewModel.toggleDarkMode() }
             )
         }
         is MainViewModel.Screen.Chat -> {
@@ -63,7 +66,10 @@ fun EduAIApp(viewModel: MainViewModel) {
                 onSendMessage = { message -> viewModel.sendMessage(message) },
                 onGenerateQuiz = { viewModel.generateQuiz() },
                 onNavigateToProgress = { viewModel.navigateTo(MainViewModel.Screen.Progress) },
-                onNavigateToSettings = { viewModel.navigateTo(MainViewModel.Screen.Settings) }
+                onNavigateToSettings = { viewModel.navigateTo(MainViewModel.Screen.Settings) },
+                onBackToWelcome = { viewModel.navigateTo(MainViewModel.Screen.Welcome) },
+                onNewChat = { viewModel.startNewChat() },
+                onShowHistory = { /* future implementation */ }
             )
         }
         is MainViewModel.Screen.Quiz -> {

@@ -220,6 +220,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _currentTopic.value = ""
     }
 
+    fun startNewChat() {
+        clearChatHistory()
+    }
+
     // Progress tracking
     private suspend fun updateLearningProgress(quizSession: QuizSession) {
         val existingProgress = progressDao.getAllProgress()
