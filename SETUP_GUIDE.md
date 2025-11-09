@@ -1,318 +1,537 @@
-# EduAI Tutor - Complete Setup Guide
+# EduAI Tutor - Developer Setup Guide
 
-## 🚀 Quick Start
+This guide will help you set up and run the EduAI Tutor Android application on your development
+machine.
 
-This guide will help you set up and run the EduAI Tutor Android app from scratch.
-
-## Prerequisites
+## 📋 Prerequisites
 
 ### Required Software
-1. **Android Studio** (Hedgehog 2023.1.1 or later)
-   - Download from: https://developer.android.com/studio
-   
-2. **JDK 17** or later
-   - Usually bundled with Android Studio
-   
-3. **Android SDK**
-   - API Level 24 (Android 7.0) minimum
-   - API Level 34 (Android 14) target
 
-### Required Accounts
-1. **Firebender Enterprise Account**
-   - Sign up at: https://firebender.ai/enterprise
-   - Get your API key from the dashboard
+1. **Android Studio** (Arctic Fox or newer)
+    - Download from: https://developer.android.com/studio
+    - Recommended: Latest stable version
 
-## Step-by-Step Setup
+2. **Java Development Kit (JDK) 8+**
+    - Included with Android Studio
+    - Or download from: https://www.oracle.com/java/technologies/downloads/
 
-### 1. Project Setup
+3. **Git** (for cloning the repository)
+    - Download from: https://git-scm.com/
+
+### Hardware Requirements
+
+- **RAM**: Minimum 8 GB (16 GB recommended)
+- **Storage**: At least 4 GB free space
+- **Internet**: Required for Gradle sync and model download
+
+### Android Device/Emulator
+
+- **Minimum Android Version**: 7.0 (API 24)
+- **Target Android Version**: 14.0 (API 34)
+- **Recommended**: Physical device for best AI performance
+
+---
+
+## 🚀 Step-by-Step Setup
+
+### 1. Clone the Repository
 
 ```bash
-# Clone or create the project
-cd /path/to/your/projects
-# If cloning:
-git clone <repository-url>
-cd eduai-tutor
-
-# Or if starting fresh, copy all the files to your project directory
+git clone <your-repo-url>
+cd eduaituitor
 ```
 
-### 2. Configure Android Studio
+### 2. Open Project in Android Studio
 
-1. Open Android Studio
-2. Click "Open" and select the project folder
-3. Wait for Gradle sync to complete
-4. If prompted, accept SDK licenses:
-   ```bash
-   yes | sdkmanager --licenses
-   ```
+1. Launch **Android Studio**
+2. Select **"Open an Existing Project"**
+3. Navigate to the `eduaituitor` folder
+4. Click **"OK"**
 
-### 3. Configure Firebender SDK
+### 3. Gradle Sync
 
-#### Option A: Using local.properties (Recommended)
-1. Create/edit `local.properties` in project root:
-   ```properties
-   sdk.dir=/path/to/Android/sdk
-   firebender.api.key=YOUR_FIREBENDER_API_KEY_HERE
-   ```
+Android Studio will automatically start syncing Gradle. If not:
 
-2. Update `FirebenderService.kt` to read from BuildConfig:
-   ```kotlin
-   private const val API_KEY = BuildConfig.FIREBENDER_API_KEY
-   ```
+1. Click **File → Sync Project with Gradle Files**
+2. Wait for the sync to complete (may take 5-10 minutes first time)
 
-#### Option B: Direct Configuration (For Testing)
-1. Open `app/src/main/java/com/example/eduaituitor/ai/FirebenderService.kt`
-2. Replace the API_KEY constant:
-   ```kotlin
-   private const val API_KEY = "your_actual_api_key_here"
-   ```
+**If you encounter Gradle errors:**
 
-### 4. Add Firebender SDK Dependency
-
-1. Open `app/build.gradle.kts`
-2. Add the Firebender SDK dependency:
-   ```kotlin
-   dependencies {
-       // ... other dependencies
-       
-       // Firebender SDK (replace x.x.x with actual version)
-       implementation("com.firebender:android-sdk:1.0.0")
-       
-       // Or if using RunAnywhere SDK:
-       implementation("com.runanywhere:sdk:1.0.0")
-   }
-   ```
-
-3. Sync Gradle files
-
-### 5. Update AndroidManifest.xml
-
-Add required permissions:
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
-    <!-- Internet permission for AI API calls -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    
-    <!-- Optional: For voice tutoring -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    
-    <application
-        android:name=".EduAIApplication"
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/Theme.EduAITutor">
-        
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.EduAITutor">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
-```
-
-### 6. Create Application Class (Optional but Recommended)
-
-Create `app/src/main/java/com/example/eduaituitor/EduAIApplication.kt`:
-```kotlin
-package com.example.eduaituitor
-
-import android.app.Application
-import com.example.eduaituitor.ai.FirebenderService
-
-class EduAIApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        
-        // Initialize Firebender SDK
-        FirebenderService().initialize()
-    }
-}
-```
-
-### 7. Build and Run
-
-1. **Connect a device or start an emulator**
-   - Physical device: Enable USB debugging in Developer Options
-   - Emulator: Create one in AVD Manager (API 24+)
-
-2. **Build the project**
-   ```bash
-   ./gradlew assembleDebug
-   ```
-
-3. **Run the app**
-   - Click the green "Run" button in Android Studio
-   - Or use command line:
-     ```bash
-     ./gradlew installDebug
-     ```
-
-## Testing the App
-
-### 1. Welcome Screen
-- App should open to a welcome screen
-- Tap "Start Learning" to proceed
-
-### 2. Chat Functionality
-Try these test questions:
-- "Teach me about photosynthesis"
-- "Explain Newton's Laws"
-- "What is quantum physics?"
-
-### 3. Quiz Feature
-- After asking a question, tap "Take a Quiz"
-- Answer the multiple-choice questions
-- View your score and feedback
-
-### 4. Progress Tracking
-- Navigate to Progress tab
-- View your learning statistics
-- Check topics studied and scores
-
-## Troubleshooting
-
-### Common Issues
-
-#### 1. Gradle Sync Failed
 ```bash
 # Clean and rebuild
 ./gradlew clean
 ./gradlew build
 ```
 
-#### 2. SDK Not Found
-- Open SDK Manager in Android Studio
-- Install Android SDK Platform 34
-- Install Android SDK Build-Tools 34.0.0
+### 4. Verify Dependencies
 
-#### 3. Firebender SDK Not Found
-- Check if dependency is correctly added
-- Verify API key is configured
-- Check internet connection
+Check that these key dependencies are resolved in `app/build.gradle.kts`:
 
-#### 4. App Crashes on Launch
-- Check Logcat for error messages
-- Verify all required permissions are granted
-- Ensure minimum SDK version is met
+- ✅ RunAnywhere SDK AAR files (in `app/libs/`)
+- ✅ Jetpack Compose BOM
+- ✅ Room Database
+- ✅ Ktor Client
+- ✅ Kotlin Coroutines
 
-#### 5. AI Responses Not Working
-- Verify Firebender API key is correct
-- Check internet connection
-- Review FirebenderService.kt implementation
-- Check API quota/limits
+### 5. Configure Build Variants
 
-### Debug Mode
+1. Go to **Build → Select Build Variant**
+2. Choose **"debug"** for development
+3. For release builds, use **"release"**
 
-Enable detailed logging:
+### 6. Set Up Emulator (Optional)
+
+If you don't have a physical device:
+
+1. Click **Tools → Device Manager**
+2. Click **"Create Device"**
+3. Select a device (e.g., Pixel 6)
+4. Choose system image: **API 34 (Android 14)** or higher
+5. Click **"Finish"**
+
+**Recommended Emulator Settings:**
+
+- RAM: 2048 MB or higher
+- Internal Storage: 2048 MB or higher
+- Enable: Use Host GPU
+
+### 7. Run the Application
+
+#### Option A: Using Android Studio
+
+1. Connect your Android device via USB (enable USB debugging) OR start emulator
+2. Click the **Run** button (▶️) or press `Shift + F10`
+3. Select your device from the list
+4. Wait for app to build and install
+
+#### Option B: Using Command Line
+
+```bash
+# Debug build
+./gradlew installDebug
+
+# Run on connected device
+adb shell am start -n com.example.eduaituitor/.MainActivity
+```
+
+---
+
+## 🔧 Configuration
+
+### Changing AI Model
+
+Edit `app/src/main/java/com/example/eduaituitor/EduAIApplication.kt`:
+
 ```kotlin
-// In FirebenderService.kt
-private const val DEBUG_MODE = true
-
-fun log(message: String) {
-    if (DEBUG_MODE) {
-        Log.d("EduAI", message)
+private suspend fun registerModels() {
+    try {
+        addModelFromURL(
+            url = "YOUR_CUSTOM_MODEL_URL.gguf",
+            name = "Your Model Name",
+            type = "LLM"
+        )
+        Log.i("EduAI", "AI model registered successfully")
+    } catch (e: Exception) {
+        Log.e("EduAI", "Model registration failed: ${e.message}", e)
     }
 }
 ```
 
-## Development Tips
+### Adjusting Fallback Behavior
 
-### 1. Hot Reload
-- Use Compose Preview for UI development
-- Enable Live Edit in Android Studio
+Edit `app/src/main/java/com/example/eduaituitor/repository/AIRepository.kt`:
 
-### 2. Testing Without AI
-- Use simulated responses in `FirebenderService.kt`
-- Comment out actual API calls during development
+```kotlin
+class AIRepository(private val application: Application) {
+    private val firebenderService = FirebenderService()
+    private var useRealAI = true // Set to false to use fallback responses
+    
+    // ... rest of code
+}
+```
 
-### 3. Database Inspection
+### Database Configuration
+
+The app uses Room database with default settings. To customize:
+
+Edit `app/src/main/java/com/example/eduaituitor/viewmodel/MainViewModel.kt`:
+
+```kotlin
+private val database = Room.databaseBuilder(
+    application,
+    AppDatabase::class.java,
+    "eduai_database" // Change database name here
+)
+.fallbackToDestructiveMigration() // Add this if you want to clear DB on schema changes
+.build()
+```
+
+---
+
+## 🐛 Common Issues & Solutions
+
+### Issue 1: Gradle Sync Failed
+
+**Error:**
+
+```
+Could not resolve dependencies
+```
+
+**Solution:**
+
+1. Check internet connection
+2. Update Gradle wrapper:
+   ```bash
+   ./gradlew wrapper --gradle-version=8.0
+   ```
+3. Invalidate caches: **File → Invalidate Caches / Restart**
+
+---
+
+### Issue 2: AAR Files Not Found
+
+**Error:**
+
+```
+Could not find RunAnywhereKotlinSDK-release.aar
+```
+
+**Solution:**
+
+1. Verify files exist in `app/libs/`:
+    - `RunAnywhereKotlinSDK-release.aar`
+    - `runanywhere-llm-llamacpp-release.aar`
+2. If missing, download from RunAnywhere SDK releases
+3. Place in `app/libs/` folder
+
+---
+
+### Issue 3: App Crashes on Launch
+
+**Error:**
+
+```
+java.lang.RuntimeException: Unable to start activity
+```
+
+**Solution:**
+
+1. Check logcat for detailed error:
+   ```bash
+   adb logcat | grep -E "EduAI|AndroidRuntime"
+   ```
+2. Common causes:
+    - Missing permissions in AndroidManifest.xml
+    - Database migration issues
+    - SDK initialization failure
+
+**Quick Fix:**
+
 ```bash
-# View Room database
-adb shell
-run-as com.example.eduaituitor
-cd databases
+# Clear app data
+adb shell pm clear com.example.eduaituitor
+
+# Reinstall
+./gradlew clean installDebug
+```
+
+---
+
+### Issue 4: Model Download Fails
+
+**Error:**
+
+```
+SDK initialization failed: Unable to download model
+```
+
+**Solution:**
+
+1. Check internet connection
+2. Ensure device has 500+ MB free storage
+3. Try downloading model manually:
+   ```bash
+   # Check available storage
+   adb shell df
+   ```
+4. Check Firebase/RunAnywhere API keys are valid
+
+---
+
+### Issue 5: Compose Preview Not Working
+
+**Error:**
+
+```
+Failed to instantiate compose preview
+```
+
+**Solution:**
+
+1. Update Android Studio to latest version
+2. Rebuild project: **Build → Clean Project → Rebuild Project**
+3. Enable Compose in Gradle:
+   ```kotlin
+   composeOptions {
+       kotlinCompilerExtensionVersion = "1.5.3"
+   }
+   ```
+
+---
+
+## 📱 Testing the App
+
+### Manual Testing Checklist
+
+#### Welcome Screen
+
+- [ ] App launches without crashes
+- [ ] Welcome screen displays correctly
+- [ ] "Start Learning" button is clickable
+
+#### Chat Screen
+
+- [ ] Chat input field is functional
+- [ ] Send button works
+- [ ] Messages appear in chat
+- [ ] AI responds within 3-5 seconds
+- [ ] Chat bubbles are properly styled
+
+#### Quiz Screen
+
+- [ ] Quiz generates after clicking button
+- [ ] Questions display correctly
+- [ ] Radio buttons work
+- [ ] Navigation (Previous/Next) works
+- [ ] Submit button validates all answers
+- [ ] Score displays correctly
+
+#### Progress Screen
+
+- [ ] Progress list displays
+- [ ] Statistics calculate correctly
+- [ ] Progress bars show accurate values
+- [ ] Reset button clears data
+
+#### Settings Screen
+
+- [ ] Dark mode toggle works
+- [ ] TTS toggle saves state
+- [ ] Clear history prompts confirmation
+- [ ] Settings persist after app restart
+
+### Automated Testing
+
+Run unit tests:
+
+```bash
+./gradlew test
+```
+
+Run instrumented tests:
+
+```bash
+./gradlew connectedAndroidTest
+```
+
+---
+
+## 🔍 Debugging Tips
+
+### Enable Verbose Logging
+
+Add to `AndroidManifest.xml`:
+
+```xml
+<application android:debuggable="true">
+```
+
+### View Logs in Real-Time
+
+```bash
+# All logs
+adb logcat
+
+# Filter by app
+adb logcat | grep EduAI
+
+# Filter by priority (Error)
+adb logcat *:E
+
+# Save to file
+adb logcat > app_logs.txt
+```
+
+### Inspect Database
+
+```bash
+# Pull database from device
+adb pull /data/data/com.example.eduaituitor/databases/eduai_database .
+
+# Open with SQLite browser
 sqlite3 eduai_database
 .tables
-SELECT * FROM quiz_sessions;
+SELECT * FROM learning_progress;
 ```
 
-### 4. Performance Monitoring
-- Use Android Profiler in Android Studio
-- Monitor memory, CPU, and network usage
+### Monitor Network Calls
 
-## Production Deployment
+Use Android Studio's Network Profiler:
 
-### 1. Update Build Configuration
+1. **View → Tool Windows → Profiler**
+2. Select your device and app
+3. Click **Network** tab
+
+---
+
+## 🏗️ Build Variants
+
+### Debug Build
+
+```bash
+./gradlew assembleDebug
+```
+
+- Includes debugging symbols
+- Logs enabled
+- Not optimized
+
+### Release Build
+
+```bash
+./gradlew assembleRelease
+```
+
+- Optimized with ProGuard/R8
+- Logs disabled
+- Signed with release key
+
+**Note:** Configure signing in `app/build.gradle.kts`:
+
 ```kotlin
-// In app/build.gradle.kts
-android {
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
+signingConfigs {
+    create("release") {
+        storeFile = file("keystore.jks")
+        storePassword = "your-password"
+        keyAlias = "your-alias"
+        keyPassword = "your-password"
     }
 }
 ```
 
-### 2. Generate Signed APK
-1. Build > Generate Signed Bundle/APK
-2. Create or select keystore
-3. Choose release build variant
-4. Sign and build
+---
 
-### 3. Test Release Build
+## 📦 Generating APK/AAB
+
+### APK (for direct installation)
+
 ```bash
 ./gradlew assembleRelease
-adb install app/build/outputs/apk/release/app-release.apk
+# Output: app/build/outputs/apk/release/app-release.apk
 ```
 
-## Next Steps
+### AAB (for Google Play)
 
-1. **Customize AI Prompts**
-   - Edit `ai/prompts/ExplanationPrompt.kt`
-   - Edit `ai/prompts/QuizPrompt.kt`
+```bash
+./gradlew bundleRelease
+# Output: app/build/outputs/bundle/release/app-release.aab
+```
 
-2. **Add More Features**
-   - Implement voice input
-   - Add more quiz types
-   - Create study schedules
+---
 
-3. **Improve UI**
-   - Customize theme colors
-   - Add animations
-   - Create custom components
+## 🌐 Environment Variables
 
-4. **Optimize Performance**
-   - Implement caching
-   - Add offline mode
-   - Optimize database queries
+Optional: Set environment variables for API keys
 
-## Resources
+**Linux/Mac:**
 
-- **Android Documentation**: https://developer.android.com
-- **Jetpack Compose**: https://developer.android.com/jetpack/compose
-- **Kotlin Coroutines**: https://kotlinlang.org/docs/coroutines-overview.html
-- **Room Database**: https://developer.android.com/training/data-storage/room
-- **Material Design 3**: https://m3.material.io
+```bash
+export RUNANYWHERE_API_KEY="your-api-key"
+export FIREBENDER_API_KEY="your-api-key"
+```
 
-## Support
+**Windows:**
 
-Need help? Check:
-- Project README.md
-- Code comments
-- Android Studio documentation
-- Stack Overflow
+```cmd
+set RUNANYWHERE_API_KEY=your-api-key
+set FIREBENDER_API_KEY=your-api-key
+```
 
-Happy coding! 🚀
+**In Code:**
+
+```kotlin
+val apiKey = System.getenv("RUNANYWHERE_API_KEY") ?: "dev"
+```
+
+---
+
+## 🎯 Next Steps
+
+Once setup is complete:
+
+1. ✅ Explore the codebase
+2. ✅ Read the main README.md
+3. ✅ Review architecture documentation
+4. ✅ Try adding a new feature
+5. ✅ Write tests for your code
+6. ✅ Submit a pull request
+
+---
+
+## 📚 Additional Resources
+
+- [Kotlin Documentation](https://kotlinlang.org/docs/home.html)
+- [Jetpack Compose Guide](https://developer.android.com/jetpack/compose)
+- [Room Database](https://developer.android.com/training/data-storage/room)
+- [RunAnywhere SDK Docs](https://docs.runanywhere.com)
+- [Material Design 3](https://m3.material.io/)
+
+---
+
+## 💬 Getting Help
+
+If you encounter issues not covered here:
+
+1. Check existing GitHub issues
+2. Search Stack Overflow
+3. Join our Discord/Slack community
+4. Open a new GitHub issue with:
+    - Error message
+    - Steps to reproduce
+    - Environment details (OS, Android Studio version)
+    - Relevant logs
+
+---
+
+## ✅ Setup Verification
+
+Run this checklist to verify your setup:
+
+```bash
+# Check Java version
+java -version  # Should be 8+
+
+# Check Gradle
+./gradlew --version
+
+# Check Android SDK
+$ANDROID_HOME/tools/bin/sdkmanager --list
+
+# Check connected devices
+adb devices
+
+# Build project
+./gradlew build
+
+# Run tests
+./gradlew test
+```
+
+If all commands complete without errors, you're ready to develop! 🎉
+
+---
+
+**Happy Coding!** 🚀
+
+For questions or support, reach out to the team or open an issue on GitHub.

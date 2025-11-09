@@ -1,17 +1,18 @@
 # EduAI Tutor 📚🤖
 
-An AI-powered Android learning assistant that provides personalized tutoring, interactive quizzes, and progress tracking - all with privacy-first on-device AI.
+An AI-powered Android learning assistant that provides personalized, on-device tutoring with
+chat-based learning, quizzes, and progress tracking.
 
 ## Features
 
-### 🎓 Core Functionality
+### Core Functionality
 - **AI Chat Tutor**: Ask questions on any topic and get clear, educational explanations
 - **Auto-Generated Quizzes**: Test your knowledge with AI-created multiple-choice questions
 - **Progress Tracking**: Monitor your learning journey with detailed statistics
 - **Voice Tutoring**: Optional text-to-speech for spoken explanations
 - **Dark Mode**: Comfortable learning in any lighting condition
 
-### 🔒 Privacy-First
+### Privacy-First
 - On-device AI processing with RunAnywhere SDK
 - No data leaves your device unless explicitly needed
 - Secure local storage for all learning data

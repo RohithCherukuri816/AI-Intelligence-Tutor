@@ -42,6 +42,8 @@ fun QuizScreen(
     currentQuestionIndex: Int,
     isLoading: Boolean,
     onAnswerSelected: (Int, Int) -> Unit,
+    onNextQuestion: () -> Unit,
+    onPreviousQuestion: () -> Unit,
     onSubmitQuiz: () -> Unit,
     onBackToChat: () -> Unit,
     modifier: Modifier = Modifier
@@ -160,9 +162,7 @@ fun QuizScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Button(
-                            onClick = {
-                                // Previous question logic would go here
-                            },
+                            onClick = onPreviousQuestion,
                             enabled = currentQuestionIndex > 0
                         ) {
                             Text("Previous")
@@ -170,15 +170,14 @@ fun QuizScreen(
 
                         if (currentQuestionIndex < questions.size - 1) {
                             Button(
-                                onClick = {
-                                    // Next question logic would go here
-                                }
+                                onClick = onNextQuestion
                             ) {
                                 Text("Next")
                             }
                         } else {
                             Button(
-                                onClick = onSubmitQuiz
+                                onClick = onSubmitQuiz,
+                                enabled = questions.all { it.userAnswer != -1 }
                             ) {
                                 Text("Submit Quiz")
                             }
@@ -207,6 +206,8 @@ fun QuizScreenPreview() {
             currentQuestionIndex = 0,
             isLoading = false,
             onAnswerSelected = { _, _ -> },
+            onNextQuestion = {},
+            onPreviousQuestion = {},
             onSubmitQuiz = {},
             onBackToChat = {}
         )
