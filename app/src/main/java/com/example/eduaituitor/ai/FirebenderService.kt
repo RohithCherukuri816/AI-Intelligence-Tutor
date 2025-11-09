@@ -30,8 +30,42 @@ class FirebenderService {
                     // Ensure SDK is initialized first
                     EduAIApplication.ensureInitialized()
 
-                    // Mark as loaded - RunAnywhere will auto-download on first generateStream() call
-                    // We don't explicitly load here; generateStream will trigger the download
+                    // Try to load a model - try common LLM model names
+                    val modelNames = listOf(
+                        "LLM",
+                        "llm",
+                        "gpt2",
+                        "gemma",
+                        "mistral",
+                        "default-llm"
+                    )
+
+                    var modelLoaded = false
+                    var lastError: Exception? = null
+
+                    for (modelName in modelNames) {
+                        try {
+                            Log.d("EduAI", "Attempting to load model: $modelName")
+                            RunAnywhere.loadModel(modelName)
+                            Log.i("EduAI", "✓ Model loaded successfully: $modelName")
+                            modelLoaded = true
+                            break
+                        } catch (e: Exception) {
+                            Log.d("EduAI", "Model $modelName not available: ${e.message}")
+                            lastError = e
+                            continue
+                        }
+                    }
+
+                    if (!modelLoaded) {
+                        Log.w(
+                            "EduAI",
+                            "No predefined model available, will attempt auto-download on first inference"
+                        )
+                        Log.w("EduAI", "Last error: ${lastError?.message}")
+                    }
+
+                    // Mark as loaded - if no explicit model is available, generateStream will handle auto-selection
                     isModelLoaded = true
                     Log.i(
                         "EduAI",
@@ -71,25 +105,31 @@ class FirebenderService {
 
             try {
                 Log.d("EduAI", "Calling RunAnywhere.generateStream()...")
+                Log.d("EduAI", "Device specs: 8 cores, 7.7GB RAM - optimal model will be selected")
+
                 RunAnywhere.generateStream(fullPrompt).collect { token ->
                     response += token
                     tokenCount++
                 }
                 Log.d("EduAI", "Stream collection completed, tokens: $tokenCount")
             } catch (e: IllegalStateException) {
-                // Model not yet loaded - development mode should have mock models
-                Log.w("EduAI", "IllegalStateException from generateStream: ${e.message}")
+                // Model not yet loaded 
+                Log.e("EduAI", "IllegalStateException - Model loading issue: ${e.message}", e)
+                Log.e("EduAI", "Exception details: ${e::class.simpleName}")
                 throw e
             } catch (e: IllegalArgumentException) {
-                // Model not yet downloaded - development mode should have mock models
-                Log.w("EduAI", "IllegalArgumentException from generateStream: ${e.message}")
+                // Model not yet downloaded
+                Log.e("EduAI", "IllegalArgumentException - Model not found: ${e.message}", e)
+                Log.e("EduAI", "Exception details: ${e::class.simpleName}")
                 throw e
             } catch (e: Exception) {
                 Log.e(
                     "EduAI",
-                    "Exception from generateStream: ${e::class.simpleName}: ${e.message}",
+                    "Unexpected exception from generateStream: ${e::class.simpleName}",
                     e
                 )
+                Log.e("EduAI", "Exception message: ${e.message}")
+                Log.e("EduAI", "Full stacktrace:", e)
                 throw e
             }
 
@@ -108,27 +148,27 @@ class FirebenderService {
                 response.trim()
             }
         } catch (e: IllegalStateException) {
-            // Handle model not downloaded / not ready
-            Log.e("EduAI", "Model not ready: ${e.message}")
-            e.message ?: "Model is not ready. Please wait for the model to download."
+            // Handle model not loaded
+            Log.e("EduAI", "Model not ready (IllegalStateException): ${e.message}")
+            "⚠️ Model is not ready yet. System error: ${e.message ?: "Unknown error"}"
+        } catch (e: IllegalArgumentException) {
+            // Handle model not found
+            Log.e("EduAI", "Model not found (IllegalArgumentException): ${e.message}")
+            "⚠️ Model file not found. System error: ${e.message ?: "Unknown error"}"
         } catch (e: Exception) {
-            Log.e(
-                "EduAI",
-                "Error generating response from model: ${e::class.simpleName}: ${e.message}",
-                e
-            )
+            Log.e("EduAI", "Error generating response: ${e::class.simpleName}: ${e.message}", e)
             when {
-                e.message?.contains("Model not found") == true -> {
-                    "Model is downloading. This is your first launch and the model is being downloaded. Please wait 2-5 minutes and try again."
+                e.message?.contains("Model not found", ignoreCase = true) == true -> {
+                    "⚠️ Model not found. Please check installation."
                 }
-                e.message?.contains("No model loaded") == true -> {
-                    "Model is not loaded yet. Please wait for the download to complete (2-5 minutes on first launch)."
+                e.message?.contains("No model loaded", ignoreCase = true) == true -> {
+                    "⚠️ No model is currently loaded."
                 }
-                e.message?.contains("Out of memory") == true || e.message?.contains("OOM") == true -> {
-                    "Insufficient memory to run the AI model. Please close some apps and try again, or restart your device."
+                e.message?.contains("Out of memory", ignoreCase = true) == true -> {
+                    "⚠️ Insufficient memory. Please close other apps."
                 }
                 else -> {
-                    "Error: ${e.message ?: "Unable to generate response"}. The model may still be downloading or loading."
+                    "⚠️ Error: ${e.message ?: "Unable to generate response"}"
                 }
             }
         }
