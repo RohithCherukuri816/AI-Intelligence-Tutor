@@ -672,13 +672,13 @@ Contributions are welcome! Please follow these steps:
 
 **Questions? Issues? Suggestions?**
 
-📧 [Email](mailto:support@eduaituitor.com) •
-🐙 [GitHub](https://github.com/yourusername/EduAITutor) •
-🌐 [Website](https://eduaituitor.com)
+📧 [Email](rohithcherukuri816@gmail.com) •
+🐙 [GitHub](https://github.com/RohithCherukuri816/AI-Intelligence-Tutor) •
+🌐 [Portfolio](http://rohithcherukuri-portfolio.s3-website.eu-north-1.amazonaws.com/) •
 
 ---
 
-### Made with ❤️ by [Your Name/Team]
+### Made with ❤️ by [Rohith Cherukuri](https://github.com/RohithCherukuri816/)
 
 <img src="https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge" alt="Made with love">
 
