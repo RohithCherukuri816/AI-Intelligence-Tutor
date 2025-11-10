@@ -29,14 +29,17 @@ class AIRepository(private val application: Application) {
                 if (it.isUser) "Student: ${it.content}" else "Tutor: ${it.content}"
             }
 
-            Log.d("AIRepository", "Calling model...")
+            Log.d("AIRepository", "Calling RunAnywhere model...")
 
             // Call RunAnywhere via FirebenderService
             val response = firebenderService.sendMessage(userMessage, context)
 
-            // Check if response is an error or empty
-            if (response.startsWith("Error:") || response.contains("Unable to generate")) {
-                Log.w("AIRepository", "Model not ready, using fallback")
+            // Check if response indicates model is downloading
+            if (response.contains("First-Run Setup") || response.contains("downloading")) {
+                Log.w("AIRepository", "Model is downloading, showing setup message")
+                response
+            } else if (response.startsWith("Error:")) {
+                Log.w("AIRepository", "Model error, using fallback")
                 getFallbackResponse(userMessage)
             } else {
                 Log.d("AIRepository", "✓ Got response from model: ${response.take(100)}...")
@@ -44,6 +47,7 @@ class AIRepository(private val application: Application) {
             }
         } catch (e: Exception) {
             Log.e("AIRepository", "Error calling model", e)
+            Log.i("AIRepository", "Using fallback response")
             getFallbackResponse(userMessage)
         }
     }
@@ -167,7 +171,7 @@ class AIRepository(private val application: Application) {
     }
 
     /**
-     * Fallback response when model is not available
+     * Enhanced fallback response with better messaging
      */
     private suspend fun getFallbackResponse(userMessage: String): String {
         // Add a small delay to simulate processing
@@ -178,34 +182,32 @@ class AIRepository(private val application: Application) {
         return when {
             userMessage.contains("hello", ignoreCase = true) ||
                     userMessage.contains("hi", ignoreCase = true) -> {
-                """Hello! I'm your AI tutor powered by RunAnywhere. I can help you learn any topic.
-                
-**Note**: The AI model is downloading and loading. This is your first launch. Please wait while the optimal model for your device downloads (2-5 minutes on Wi-Fi). You'll see a notification when ready!
-                
-Just ask me to explain something, like:
+                """👋 Hello! I'm your AI tutor powered by RunAnywhere.
+
+**Note**: I'm currently using pre-cached educational responses. For real-time AI responses:
+• The RunAnywhere SDK is integrating on-device models
+• Full AI features coming soon!
+
+In the meantime, I can help you learn:
 • "Teach me about photosynthesis"
 • "Explain Newton's Laws"
 • "How does programming work?"
+• "Create a quiz on [topic]"
 
-Would you like to start learning?"""
+What would you like to learn about?"""
             }
             userMessage.contains("quiz", ignoreCase = true) -> {
-                "I'd be happy to create a quiz for you about $topic! The model is loading, so I'll use pre-made questions for now."
+                "I'd be happy to create a quiz for you about $topic! Let me prepare some questions..."
             }
             else -> {
-                """I'd be happy to explain $topic!
-
-**Note**: I'm currently using fallback mode while the model loads. Responses will be much better once it's ready!
+                """📚 Let me explain $topic:
 
 ${getSampleExplanation(topic)}
 
-This is a foundational explanation. Once the model is loaded, I can provide:
-• More detailed explanations
-• Personalized examples
-• Interactive quizzes
-• Step-by-step breakdowns
+---
+**💡 Pro Tip**: This is using our knowledge base. For personalized, real-time AI tutoring, we're working on full model integration!
 
-Would you like to continue, or shall I create a quiz?"""
+Would you like me to create a quiz to test your understanding?"""
             }
         }
     }
