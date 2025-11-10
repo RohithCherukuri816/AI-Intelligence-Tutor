@@ -510,13 +510,7 @@ runanywhere-llm-llamacpp-release.aar
 - **Storage**: 2GB free
 - **Processor**: Snapdragon 800 or equivalent
 
-### Tested Devices
 
-- ✅ Samsung Galaxy S21
-- ✅ Google Pixel 6
-- ✅ OnePlus 9
-- ✅ Xiaomi Redmi Note 10
-- ✅ Android emulators (API 26-35)
 
 ---
 
