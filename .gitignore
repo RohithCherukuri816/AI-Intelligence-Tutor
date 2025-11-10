@@ -1,15 +1,117 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Gradle files
+.gradle/
+build/
+dist/
+*.jar
+*.aar
+*.zip
+*.tar.gz
+
+# Local configuration
 local.properties
+gradle.properties
+keystore.jks
+*.keystore
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+app/build/
+*.apk
+*.ap_
+*.dex
+
+# Secrets and credentials
+.env
+.env.local
+*.key
+*.pem
+secrets.json
+
+# Android Profiler
+.androidstudio*
+profiler*.csv
+*.trace
+
+# Generated files
+app/src/main/java/com/example/eduaituitor/databinding/
+app/src/main/java/com/example/eduaituitor/generated/
+
+# Room database files
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Node modules (if used for build tools)
+node_modules/
+
+# Private files
+private/
+secrets/
+credentials/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Linux
+.directory
+
+# API Keys and sensitive data
+**/api_keys.properties
+**/keys.properties
+**.properties (contains API keys)
+
+# Build caches
+.gradle/
+.m2/
+
+# Compiled output
+bin/
+out/
+
+# Git LFS
+*.psd
+*.zip
+*.rar
+*.7z
+
+# Generated files
+generated/
+gen/
+
+# Fabric
+fabric.properties
+
+# Run configurations
+run_configs/
+
+# Firebase
+google-services.json
+
+# Any file containing "AIza" (Google API keys)
+**/schemas/
+**/room_schemas/

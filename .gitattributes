@@ -1,0 +1,35 @@
+* text=auto
+
+# Explicitly declare XML files as text
+*.xml text
+*.gradle text
+*.properties text
+*.kt text
+*.java text
+*.json text
+*.md text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.zip binary
+*.rar binary
+*.7z binary
+*.jar binary
+*.aar binary
+*.apk binary
+
+# Prevent these from being committed
+local.properties export-ignore
+.env export-ignore
+*.key export-ignore
+*.keystore export-ignore
+secrets.json export-ignore
+google-services.json export-ignore
+
+# Merge strategies
+*.aar merge=binary
+*.jar merge=binary
