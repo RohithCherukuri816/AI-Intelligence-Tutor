@@ -14,4 +14,10 @@ interface LearningProgressDao {
 
     @Update
     suspend fun updateProgress(progress: LearningProgress)
+
+    @Delete
+    suspend fun deleteProgress(progress: LearningProgress)
+
+    @Query("DELETE FROM learning_progress WHERE topic = :topic")
+    suspend fun deleteProgressByTopic(topic: String)
 }

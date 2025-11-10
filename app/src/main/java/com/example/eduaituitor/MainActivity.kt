@@ -12,9 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.eduaituitor.ui.screens.ChatScreen
+import com.example.eduaituitor.ui.screens.ChatHistoryScreen
 import com.example.eduaituitor.ui.screens.ProgressScreen
+import com.example.eduaituitor.ui.screens.ProgressDetailScreen
 import com.example.eduaituitor.ui.screens.QuizScreen
-import com.example.eduaituitor.ui.screens.SettingsScreen
+import com.example.eduaituitor.ui.screens.QuizHistoryScreen
+import com.example.eduaituitor.ui.screens.ResultsScreen
 import com.example.eduaituitor.ui.screens.WelcomeScreen
 import com.example.eduaituitor.ui.theme.EduAITuitorTheme
 import com.example.eduaituitor.viewmodel.MainViewModel
@@ -36,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    EduAIApp(viewModel)
+                    EduAIApp(viewModel, appSettings.isDarkMode, { viewModel.toggleDarkMode() })
                 }
             }
         }
@@ -44,16 +47,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun EduAIApp(viewModel: MainViewModel) {
+fun EduAIApp(viewModel: MainViewModel, isDarkMode: Boolean, onToggleDarkMode: () -> Unit) {
     val currentScreen by viewModel.currentScreen.collectAsState()
     
     when (currentScreen) {
         is MainViewModel.Screen.Welcome -> {
-            val appSettings by viewModel.appSettings.collectAsState()
             WelcomeScreen(
                 onStartLearning = { viewModel.navigateTo(MainViewModel.Screen.Chat) },
-                isDarkMode = appSettings.isDarkMode,
-                onToggleDarkMode = { viewModel.toggleDarkMode() }
+                isDarkMode = isDarkMode,
+                onToggleDarkMode = onToggleDarkMode
             )
         }
         is MainViewModel.Screen.Chat -> {
@@ -66,10 +68,48 @@ fun EduAIApp(viewModel: MainViewModel) {
                 onSendMessage = { message -> viewModel.sendMessage(message) },
                 onGenerateQuiz = { viewModel.generateQuiz() },
                 onNavigateToProgress = { viewModel.navigateTo(MainViewModel.Screen.Progress) },
-                onNavigateToSettings = { viewModel.navigateTo(MainViewModel.Screen.Settings) },
                 onBackToWelcome = { viewModel.navigateTo(MainViewModel.Screen.Welcome) },
                 onNewChat = { viewModel.startNewChat() },
-                onShowHistory = { /* future implementation */ }
+                onShowHistory = { viewModel.navigateTo(MainViewModel.Screen.ChatHistory) },
+                onEditMessage = { messageId, newText -> viewModel.editMessage(messageId, newText) }
+            )
+        }
+        is MainViewModel.Screen.ChatHistory -> {
+            val allMessages by viewModel.chatMessages.collectAsState()
+            val quizSessions by viewModel.quizSessions.collectAsState()
+
+            ChatHistoryScreen(
+                allMessages = allMessages,
+                allQuizSessions = quizSessions,
+                onBack = { viewModel.navigateTo(MainViewModel.Screen.Chat) },
+                onTopicClick = { topic, messages -> viewModel.openTopicChat(topic, messages) },
+                onDeleteTopic = { topic -> viewModel.deleteTopicMessages(topic) },
+                onDeleteQuiz = { quizSession -> viewModel.deleteQuiz(quizSession) }
+            )
+        }
+
+        is MainViewModel.Screen.ChatDetail -> {
+            val messages by viewModel.chatMessages.collectAsState()
+
+            ChatScreen(
+                messages = messages,
+                isLoading = false,
+                onSendMessage = { message -> viewModel.sendMessage(message) },
+                onGenerateQuiz = { viewModel.generateQuiz() },
+                onNavigateToProgress = { viewModel.navigateTo(MainViewModel.Screen.Progress) },
+                onBackToWelcome = { viewModel.navigateTo(MainViewModel.Screen.ChatHistory) },
+                onNewChat = { viewModel.startNewChat() },
+                onShowHistory = { viewModel.navigateTo(MainViewModel.Screen.ChatHistory) },
+                onEditMessage = { messageId, newText -> viewModel.editMessage(messageId, newText) }
+            )
+        }
+
+        is MainViewModel.Screen.QuizHistory -> {
+            val quizSessions by viewModel.quizSessions.collectAsState()
+
+            QuizHistoryScreen(
+                quizSessions = quizSessions,
+                onBack = { viewModel.navigateTo(MainViewModel.Screen.Chat) }
             )
         }
         is MainViewModel.Screen.Quiz -> {
@@ -96,19 +136,31 @@ fun EduAIApp(viewModel: MainViewModel) {
             ProgressScreen(
                 progressList = progressList,
                 onBack = { viewModel.navigateTo(MainViewModel.Screen.Chat) },
-                onResetProgress = { viewModel.resetProgress() }
+                onResetProgress = { viewModel.resetProgress() },
+                onProgressClick = { progress -> viewModel.viewProgressDetail(progress) }
             )
         }
-        is MainViewModel.Screen.Settings -> {
-            val appSettings by viewModel.appSettings.collectAsState()
+        is MainViewModel.Screen.Results -> {
+            val quizScore by viewModel.quizScore.collectAsState()
+            val totalQuestions by viewModel.totalQuestions.collectAsState()
+            val currentTopic by viewModel.currentTopic.collectAsState()
 
-            SettingsScreen(
-                settings = appSettings,
-                onToggleDarkMode = { viewModel.toggleDarkMode() },
-                onToggleVoiceTutoring = { viewModel.toggleVoiceTutoring() },
-                onClearChatHistory = { viewModel.clearChatHistory() },
-                onBack = { viewModel.navigateTo(MainViewModel.Screen.Chat) }
+            ResultsScreen(
+                score = quizScore,
+                totalQuestions = totalQuestions,
+                topic = currentTopic,
+                onBackToChat = { viewModel.navigateTo(MainViewModel.Screen.Chat) }
             )
+        }
+        is MainViewModel.Screen.ProgressDetail -> {
+            val selectedProgress by viewModel.selectedProgress.collectAsState()
+
+            if (selectedProgress != null) {
+                ProgressDetailScreen(
+                    progress = selectedProgress!!,
+                    onBack = { viewModel.navigateTo(MainViewModel.Screen.Progress) }
+                )
+            }
         }
     }
 }

@@ -2,42 +2,42 @@ package com.example.eduaituitor.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light Theme Colors - Modern & Vibrant
-val PrimaryLight = Color(0xFF6366F1) // Indigo 500
-val PrimaryVariantLight = Color(0xFF4F46E5) // Indigo 600
-val SecondaryLight = Color(0xFF8B5CF6) // Violet 500
-val TertiaryLight = Color(0xFFEC4899) // Pink 500
+// Light Theme Colors 
+val PrimaryLight = Color(0xFF007BFF) // Electric Blue
+val PrimaryVariantLight = Color(0xFF0056CC) // Darker Electric Blue
+val SecondaryLight = Color(0xFF9D50BB) // Purple Pink Mix
+val TertiaryLight = Color(0xFF00F5D4) // Neon Cyan
 val BackgroundLight = Color(0xFFF8FAFC) // Slate 50
 val SurfaceLight = Color(0xFFFFFFFF)
 val ErrorLight = Color(0xFFEF4444) // Red 500
 val SuccessLight = Color(0xFF10B981) // Green 500
 val WarningLight = Color(0xFFF59E0B) // Amber 500
 
-// Dark Theme Colors - Premium Dark
-val PrimaryDark = Color(0xFF818CF8) // Indigo 400
-val PrimaryVariantDark = Color(0xFFA5B4FC) // Indigo 300
-val SecondaryDark = Color(0xFFA78BFA) // Violet 400
-val TertiaryDark = Color(0xFFF472B6) // Pink 400
-val BackgroundDark = Color(0xFF0F172A) // Slate 900
-val SurfaceDark = Color(0xFF1E293B) // Slate 800
+// Dark Theme Colors 
+val PrimaryDark = Color(0xFF0099FF) // Lighter Electric Blue
+val PrimaryVariantDark = Color(0xFF007BFF) // Electric Blue
+val SecondaryDark = Color(0xFFB575D1) // Lighter Purple Pink
+val TertiaryDark = Color(0xFF7A2E8F) // Darker Purple Pink
+val BackgroundDark = Color(0xFF0B0C10) // Deep Navy
+val SurfaceDark = Color(0xFF16213E) // Medium Navy
 val ErrorDark = Color(0xFFFCA5A5) // Red 300
 val SuccessDark = Color(0xFF6EE7B7) // Green 300
 val WarningDark = Color(0xFFFBBF24) // Amber 300
 
 // Gradient Colors
-val GradientStart = Color(0xFF6366F1) // Indigo
-val GradientMiddle = Color(0xFF8B5CF6) // Violet
-val GradientEnd = Color(0xFFEC4899) // Pink
+val GradientStart = Color(0xFF007BFF) // Electric Blue
+val GradientMiddle = Color(0xFF9D50BB) // Purple Pink Mix
+val GradientEnd = Color(0xFF00F5D4) // Neon Cyan
 
 // Accent Colors
-val AccentBlue = Color(0xFF3B82F6) // Blue 500
-val AccentPurple = Color(0xFF9333EA) // Purple 600
+val AccentBlue = Color(0xFF007BFF) // Electric Blue
+val AccentPurple = Color(0xFF9D50BB) // Purple Pink Mix
 val AccentPink = Color(0xFFDB2777) // Pink 600
 val AccentOrange = Color(0xFFF97316) // Orange 500
 
 // Chat Bubble Colors
-val UserBubbleLight = Color(0xFF6366F1) // Primary
-val UserBubbleDark = Color(0xFF4F46E5)
+val UserBubbleLight = Color(0xFF007BFF) // Electric Blue
+val UserBubbleDark = Color(0xFF0056CC) // Darker Electric Blue
 val AIBubbleLight = Color(0xFFF1F5F9) // Slate 100
 val AIBubbleDark = Color(0xFF334155) // Slate 700
 
@@ -52,10 +52,10 @@ val ShimmerLight = Color(0xFFE2E8F0) // Slate 200
 val ShimmerDark = Color(0xFF475569) // Slate 600
 
 // Legacy Colors (for compatibility)
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Purple80 = Color(0xFF9D50BB)
+val PurpleGrey80 = Color(0xFFB575D1)
+val Pink80 = Color(0xFFEC9AB9)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val Purple40 = Color(0xFF007BFF)
+val PurpleGrey40 = Color(0xFF0056CC)
+val Pink40 = Color(0xFF9D50BB)

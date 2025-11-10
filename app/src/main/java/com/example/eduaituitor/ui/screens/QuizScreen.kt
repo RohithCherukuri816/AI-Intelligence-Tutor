@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,6 +43,10 @@ import com.example.eduaituitor.ui.theme.GradientStart
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.scale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -262,6 +267,181 @@ fun QuizScreenPreview() {
             onNextQuestion = {},
             onPreviousQuestion = {},
             onSubmitQuiz = {},
+            onBackToChat = {}
+        )
+    }
+}
+
+// ============ RESULTS SCREEN ============
+
+@Composable
+fun ResultsScreen(
+    score: Int,
+    totalQuestions: Int,
+    topic: String,
+    onBackToChat: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val percentage = (score * 100 / totalQuestions)
+    val animatedScore = androidx.compose.animation.core.animateIntAsState(
+        targetValue = score,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500)
+    )
+    val animatedPercentage = androidx.compose.animation.core.animateIntAsState(
+        targetValue = percentage,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500)
+    )
+    val scaleAnimation = androidx.compose.animation.core.animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = 0.5f,
+            stiffness = 200f
+        )
+    )
+
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically)
+        ) {
+            // Celebration emoji/icon
+            Text(
+                text = if (percentage >= 80) "🎉" else if (percentage >= 60) "🌟" else "💪",
+                fontSize = 80.sp,
+                modifier = Modifier.scale(scaleAnimation.value)
+            )
+
+            // Score Circle with animation
+            Box(
+                modifier = Modifier
+                    .size(220.dp)
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(
+                        brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                            colors = listOf(GradientStart, GradientEnd)
+                        )
+                    )
+                    .scale(scaleAnimation.value),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "${animatedPercentage.value}%",
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 60.sp
+                        ),
+                        color = androidx.compose.ui.graphics.Color.White
+                    )
+                    Text(
+                        text = "${animatedScore.value}/${totalQuestions}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)
+                    )
+                }
+            }
+
+            // Topic Display
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = GradientStart.copy(alpha = 0.1f)
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Topic",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = topic,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            // Feedback message
+            val feedbackMessage = when {
+                percentage >= 90 -> "Outstanding! Perfect mastery! 🏆"
+                percentage >= 80 -> "Excellent work! You've mastered this topic! 🎯"
+                percentage >= 70 -> "Great job! You're doing well! 👏"
+                percentage >= 60 -> "Good effort! Keep practicing to improve! 📚"
+                percentage >= 50 -> "Not bad! Review the material and try again! 💡"
+                else -> "Keep learning! This will get easier with practice! 🚀"
+            }
+
+            Text(
+                text = feedbackMessage,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                textAlign = TextAlign.Center,
+                color = when {
+                    percentage >= 80 -> GradientStart
+                    percentage >= 60 -> androidx.compose.material3.MaterialTheme.colorScheme.primary
+                    else -> androidx.compose.material3.MaterialTheme.colorScheme.secondary
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Buttons
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onBackToChat,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GradientStart
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        "Back to Chat",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ResultsScreenPreview() {
+    MaterialTheme {
+        ResultsScreen(
+            score = 8,
+            totalQuestions = 10,
+            topic = "Photosynthesis",
             onBackToChat = {}
         )
     }

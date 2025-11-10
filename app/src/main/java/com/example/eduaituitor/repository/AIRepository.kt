@@ -2,23 +2,22 @@ package com.example.eduaituitor.repository
 
 import android.app.Application
 import android.util.Log
-import com.example.eduaituitor.ai.FirebenderService
+import com.example.eduaituitor.ai.OnDeviceInferenceService
 import com.example.eduaituitor.data.ChatMessage
 import com.example.eduaituitor.data.QuizQuestion
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 /**
- * Repository for handling AI interactions with RunAnywhere model
- * Uses RunAnywhere SDK via FirebenderService
+ * Repository for handling AI interactions using on-device generative models
+ * Uses OnDeviceInferenceService for inference with automatic model selection
  */
 class AIRepository(private val application: Application) {
 
-    private val firebenderService = FirebenderService()
+    private val onDeviceInferenceService = OnDeviceInferenceService(application)
 
     /**
-     * Get AI response using RunAnywhere model
-     * Falls back to sample responses if model isn't loaded
+     * Get AI response using on-device model inference
      */
     suspend fun getAIResponse(userMessage: String, chatHistory: List<ChatMessage>): String {
         Log.d("AIRepository", "Getting AI response for: ${userMessage.take(50)}...")
@@ -29,63 +28,125 @@ class AIRepository(private val application: Application) {
                 if (it.isUser) "Student: ${it.content}" else "Tutor: ${it.content}"
             }
 
-            Log.d("AIRepository", "Calling RunAnywhere model...")
+            Log.d("AIRepository", "Calling OnDeviceInferenceService...")
 
-            // Call RunAnywhere via FirebenderService
-            val response = firebenderService.sendMessage(userMessage, context)
+            // Call OnDeviceInferenceService
+            val response = onDeviceInferenceService.sendMessage(userMessage, context)
 
-            // Check if response indicates model is downloading
-            if (response.contains("First-Run Setup") || response.contains("downloading")) {
-                Log.w("AIRepository", "Model is downloading, showing setup message")
-                response
-            } else if (response.startsWith("Error:")) {
-                Log.w("AIRepository", "Model error, using fallback")
+            // Check if response indicates an error
+            if (response.startsWith("Error:")) {
+                Log.w("AIRepository", "API error, using fallback")
                 getFallbackResponse(userMessage)
             } else {
-                Log.d("AIRepository", "✓ Got response from model: ${response.take(100)}...")
+                Log.d(
+                    "AIRepository",
+                    " Got response from OnDeviceInferenceService: ${response.take(100)}..."
+                )
                 response
             }
         } catch (e: Exception) {
-            Log.e("AIRepository", "Error calling model", e)
+            Log.e("AIRepository", "Error calling OnDeviceInferenceService", e)
             Log.i("AIRepository", "Using fallback response")
             getFallbackResponse(userMessage)
         }
     }
 
     /**
-     * Generate quiz using RunAnywhere model
-     * Falls back to sample questions if model isn't loaded
+     * Generate quiz using on-device model inference
      */
     suspend fun generateQuiz(topic: String): List<QuizQuestion> {
-        Log.d("AIRepository", "Generating quiz for: $topic")
+        Log.d("AIRepository", "=== QUIZ GENERATION STARTED ===")
+        Log.d("AIRepository", "Topic requested: '$topic'")
 
         return try {
-            Log.d("AIRepository", "Calling model for quiz generation...")
+            if (topic.isBlank()) {
+                Log.e("AIRepository", "ERROR: Topic is blank! Using fallback")
+                return getSampleQuestions("General")
+            }
 
-            // Call RunAnywhere to generate quiz
-            val quizText = firebenderService.generateQuiz(topic, 5)
+            Log.d("AIRepository", "Building quiz prompt for topic: $topic")
+            val quizPrompt = buildQuizPrompt(topic)
+            Log.d("AIRepository", "Quiz prompt: ${quizPrompt.take(150)}...")
+
+            Log.d("AIRepository", "Calling OnDeviceInferenceService for quiz generation...")
+            val quizText = onDeviceInferenceService.sendMessage(quizPrompt)
+
+            Log.d(
+                "AIRepository",
+                "Got response from OnDeviceInferenceService: ${quizText.take(200)}..."
+            )
 
             // Check if response is valid
-            if (quizText.startsWith("Error:") || quizText.contains("Unable to generate")) {
-                Log.w("AIRepository", "Model not ready for quiz, using fallback")
-                getSampleQuestions(topic)
-            } else {
-                // Parse the quiz response from model
-                Log.d("AIRepository", "Parsing quiz from model response...")
-                val questions = parseQuizFromGemma(quizText)
-
-                if (questions.isEmpty()) {
-                    Log.w("AIRepository", "Failed to parse model quiz, using fallback")
-                    getSampleQuestions(topic)
-                } else {
-                    Log.d("AIRepository", "✓ Got ${questions.size} questions from model")
-                    questions
-                }
+            if (quizText.isEmpty() || quizText.startsWith("Error:")) {
+                Log.w(
+                    "AIRepository",
+                    "API error or empty response for quiz, trying to parse fallback"
+                )
+                return getSampleQuestions(topic)
             }
+
+            // Parse the quiz response from OnDeviceInferenceService
+            Log.d("AIRepository", "Parsing quiz from OnDeviceInferenceService response...")
+            val questions = parseQuizFromGemma(quizText, topic)
+
+            if (questions.isEmpty()) {
+                Log.w(
+                    "AIRepository",
+                    "Failed to parse OnDeviceInferenceService quiz (empty result), using fallback for topic: $topic"
+                )
+                return getSampleQuestions(topic)
+            }
+
+            Log.d(
+                "AIRepository",
+                " Successfully parsed ${questions.size} questions from OnDeviceInferenceService"
+            )
+            Log.d("AIRepository", "=== QUIZ GENERATION COMPLETED ===")
+            questions
         } catch (e: Exception) {
-            Log.e("AIRepository", "Error generating quiz with model", e)
+            Log.e("AIRepository", "ERROR in generateQuiz: ${e.message}", e)
+            Log.i("AIRepository", "Using fallback questions for topic: $topic")
             getSampleQuestions(topic)
         }
+    }
+
+    /**
+     * Build a quiz prompt for the given topic
+     */
+    private fun buildQuizPrompt(topic: String): String {
+        return """You are an expert educational quiz generator. Your task is to create exactly 5 multiple-choice questions that test understanding of the specific topic: "$topic"
+
+IMPORTANT: 
+- Questions MUST be directly about the topic: $topic
+- If the topic is a subject (like "Photosynthesis"), ask questions about that specific subject
+- Do NOT ask generic learning questions
+- Make sure each question is relevant and tests real knowledge of $topic
+
+Format your response EXACTLY like this (no other text before or after):
+
+Q: [First specific question about $topic]
+A) [Option 1]
+B) [Option 2]
+C) [Option 3]
+D) [Option 4]
+Correct: [Letter A, B, C, or D]
+
+Q: [Second specific question about $topic]
+A) [Option 1]
+B) [Option 2]
+C) [Option 3]
+D) [Option 4]
+Correct: [Letter A, B, C, or D]
+
+[Continue for all 5 questions]
+
+Example for topic "Photosynthesis":
+Q: What is the primary source of energy for photosynthesis?
+A) Water
+B) Sunlight
+C) Soil nutrients
+D) Carbon dioxide
+Correct: B"""
     }
 
     /**
@@ -98,7 +159,7 @@ class AIRepository(private val application: Application) {
      * D) Option 4
      * Correct: B
      */
-    private fun parseQuizFromGemma(quizText: String): List<QuizQuestion> {
+    private fun parseQuizFromGemma(quizText: String, topic: String): List<QuizQuestion> {
         val questions = mutableListOf<QuizQuestion>()
 
         try {
@@ -182,10 +243,10 @@ class AIRepository(private val application: Application) {
         return when {
             userMessage.contains("hello", ignoreCase = true) ||
                     userMessage.contains("hi", ignoreCase = true) -> {
-                """👋 Hello! I'm your AI tutor powered by RunAnywhere.
+                """👋 Hello! I'm your AI tutor powered by on-device models.
 
 **Note**: I'm currently using pre-cached educational responses. For real-time AI responses:
-• The RunAnywhere SDK is integrating on-device models
+• The OnDeviceInferenceService is integrating on-device models
 • Full AI features coming soon!
 
 In the meantime, I can help you learn:

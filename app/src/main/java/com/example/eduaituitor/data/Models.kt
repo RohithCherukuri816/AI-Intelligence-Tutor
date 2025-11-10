@@ -14,7 +14,8 @@ data class ChatMessage(
     val content: String = "",
     val isUser: Boolean = true,
     val timestamp: Long = System.currentTimeMillis(),
-    val topic: String = ""
+    val topic: String = "",
+    val edited: Boolean = false
 )
 
 // Quiz question model

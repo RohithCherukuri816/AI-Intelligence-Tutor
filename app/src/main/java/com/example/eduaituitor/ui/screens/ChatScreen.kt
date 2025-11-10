@@ -26,13 +26,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.AlertDialog
@@ -82,10 +82,10 @@ fun ChatScreen(
     onSendMessage: (String) -> Unit,
     onGenerateQuiz: () -> Unit,
     onNavigateToProgress: () -> Unit,
-    onNavigateToSettings: () -> Unit = {},
     onBackToWelcome: () -> Unit = {},
     onNewChat: () -> Unit = {},
     onShowHistory: () -> Unit = {},
+    onEditMessage: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var messageText by remember { mutableStateOf("") }
@@ -188,7 +188,7 @@ fun ChatScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Filled.History,
-                                        contentDescription = "Chat History",
+                                        contentDescription = "History",
                                         tint = Color.White,
                                         modifier = Modifier.size(24.dp)
                                     )
@@ -202,19 +202,6 @@ fun ChatScreen(
                                     Icon(
                                         imageVector = Icons.Filled.TrendingUp,
                                         contentDescription = "Progress",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-
-                                // Settings button
-                                IconButton(
-                                    onClick = onNavigateToSettings,
-                                    modifier = Modifier.size(40.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Settings,
-                                        contentDescription = "Settings",
                                         tint = Color.White,
                                         modifier = Modifier.size(24.dp)
                                     )
@@ -260,7 +247,7 @@ fun ChatScreen(
                     }
 
                     items(messages) { message ->
-                        EnhancedChatBubble(message = message)
+                        EnhancedChatBubble(message = message, onEditMessage = onEditMessage)
                     }
 
                     // Typing indicator
@@ -456,8 +443,9 @@ private fun SuggestionChip(text: String) {
 }
 
 @Composable
-private fun EnhancedChatBubble(message: ChatMessage) {
+private fun EnhancedChatBubble(message: ChatMessage, onEditMessage: (String, String) -> Unit) {
     val isUser = message.isUser
+    var showEditDialog by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -482,23 +470,63 @@ private fun EnhancedChatBubble(message: ChatMessage) {
             Spacer(modifier = Modifier.width(8.dp))
         }
 
-        Surface(
-            modifier = Modifier.widthIn(max = 280.dp),
-            shape = RoundedCornerShape(
-                topStart = 20.dp,
-                topEnd = 20.dp,
-                bottomStart = if (isUser) 20.dp else 4.dp,
-                bottomEnd = if (isUser) 4.dp else 20.dp
-            ),
-            color = if (isUser) GradientStart else MaterialTheme.colorScheme.surfaceVariant,
-            shadowElevation = 2.dp
+        Column(
+            modifier = Modifier.widthIn(max = 280.dp)
         ) {
-            Text(
-                text = message.content,
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface
-            )
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(
+                    topStart = 20.dp,
+                    topEnd = 20.dp,
+                    bottomStart = if (isUser) 20.dp else 4.dp,
+                    bottomEnd = if (isUser) 4.dp else 20.dp
+                ),
+                color = if (isUser) GradientStart else MaterialTheme.colorScheme.surfaceVariant,
+                shadowElevation = 2.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = message.content,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+
+                        if (isUser) {
+                            IconButton(
+                                onClick = { showEditDialog = true },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = "Edit message",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    // Show edited label if message was edited
+                    if (message.edited && isUser) {
+                        Text(
+                            text = "(edited)",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isUser) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            modifier = Modifier.align(Alignment.End)
+                        )
+                    }
+                }
+            }
         }
 
         if (isUser) {
@@ -520,6 +548,63 @@ private fun EnhancedChatBubble(message: ChatMessage) {
             }
         }
     }
+
+    if (showEditDialog) {
+        EditMessageDialog(
+            messageId = message.id,
+            originalMessage = message.content,
+            onEdit = { messageId, newContent ->
+                onEditMessage(messageId, newContent)
+                showEditDialog = false
+            },
+            onDismiss = { showEditDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun EditMessageDialog(
+    messageId: String,
+    originalMessage: String,
+    onEdit: (String, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var editedText by remember { mutableStateOf(originalMessage) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit and Resend") },
+        text = {
+            OutlinedTextField(
+                value = editedText,
+                onValueChange = { editedText = it },
+                label = { Text("Edit your message") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = GradientStart,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                ),
+                maxLines = 5
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (editedText.isNotBlank()) {
+                        onEdit(messageId, editedText)
+                    }
+                }
+            ) {
+                Text("Resend")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -692,10 +777,10 @@ fun ChatScreenPreview() {
             onSendMessage = {},
             onGenerateQuiz = {},
             onNavigateToProgress = {},
-            onNavigateToSettings = {},
             onBackToWelcome = {},
             onNewChat = {},
-            onShowHistory = {}
+            onShowHistory = {},
+            onEditMessage = { _, _ -> }
         )
     }
 }

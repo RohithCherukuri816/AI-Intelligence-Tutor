@@ -1,5 +1,6 @@
 package com.example.eduaituitor.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ fun ProgressScreen(
     progressList: List<LearningProgress>,
     onBack: () -> Unit,
     onResetProgress: () -> Unit,
+    onProgressClick: (LearningProgress) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -136,7 +138,10 @@ fun ProgressScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(progressList) { progress ->
-                            ProgressItem(progress = progress)
+                            ProgressItem(
+                                progress = progress,
+                                onClick = { onProgressClick(progress) }
+                            )
                         }
                     }
 
@@ -157,12 +162,25 @@ fun ProgressScreen(
 }
 
 @Composable
-fun ProgressItem(progress: LearningProgress) {
+fun ProgressItem(
+    progress: LearningProgress,
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .let {
+                if (onClick != {}) {
+                    it.clickable { onClick() }
+                } else {
+                    it
+                }
+            }
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -214,7 +232,7 @@ fun ProgressItem(progress: LearningProgress) {
     }
 }
 
-private fun getRelativeTime(timestamp: Long): String {
+fun getRelativeTime(timestamp: Long): String {
     val diff = System.currentTimeMillis() - timestamp
     val days = diff / (1000 * 60 * 60 * 24)
 
@@ -230,27 +248,9 @@ private fun getRelativeTime(timestamp: Long): String {
 @Preview(showBackground = true)
 @Composable
 fun ProgressScreenPreview() {
-    val sampleProgress = listOf(
-        LearningProgress(
-            topic = "photosynthesis",
-            quizScores = listOf(80, 90, 70),
-            lastStudied = System.currentTimeMillis()
-        ),
-        LearningProgress(
-            topic = "physics",
-            quizScores = listOf(60, 75),
-            lastStudied = System.currentTimeMillis()
-        ),
-        LearningProgress(
-            topic = "math",
-            quizScores = listOf(85),
-            lastStudied = System.currentTimeMillis()
-        )
-    )
-
     MaterialTheme {
         ProgressScreen(
-            progressList = sampleProgress,
+            progressList = emptyList(),
             onBack = {},
             onResetProgress = {}
         )

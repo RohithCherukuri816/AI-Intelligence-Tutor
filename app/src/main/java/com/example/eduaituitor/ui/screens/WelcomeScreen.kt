@@ -26,8 +26,8 @@ import com.example.eduaituitor.ui.theme.*
 @Composable
 fun WelcomeScreen(
     onStartLearning: () -> Unit,
-    isDarkMode: Boolean,
-    onToggleDarkMode: () -> Unit,
+    isDarkMode: Boolean = false,
+    onToggleDarkMode: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -388,7 +388,7 @@ private fun ThemeToggleCard(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
 fun WelcomeScreenPreview() {
     EduAITuitorTheme {
@@ -400,13 +400,9 @@ fun WelcomeScreenPreview() {
     }
 }
 
-@Preview(
-    showBackground = true,
-    showSystemUi = true,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
-)
+@Preview(showBackground = true)
 @Composable
-fun WelcomeScreenDarkPreview() {
+fun WelcomeScreenPreviewDark() {
     EduAITuitorTheme(darkTheme = true) {
         WelcomeScreen(
             onStartLearning = {},

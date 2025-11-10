@@ -10,7 +10,7 @@ import com.example.eduaituitor.data.database.dao.QuizSessionDao
 
 @Database(
     entities = [QuizSession::class, LearningProgress::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

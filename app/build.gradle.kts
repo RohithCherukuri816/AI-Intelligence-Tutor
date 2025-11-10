@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.eduaituitor"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -113,6 +113,10 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // HTTP for Gemini API calls
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
