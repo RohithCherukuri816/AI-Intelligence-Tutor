@@ -1,18 +1,14 @@
-# 🎓 EduAI Tutor
-
 <div align="center">
 
-![EduAI Tutor](https://img.shields.io/badge/EduAI-Tutor-blue?style=for-the-badge&logo=android&logoColor=white)
-![Version](https://img.shields.io/badge/Version-1.0-brightgreen?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Android](https://img.shields.io/badge/Android-26%2B-brightgreen?style=for-the-badge&logo=android)
-![Kotlin](https://img.shields.io/badge/Kotlin-1.8%2B-purple?style=for-the-badge&logo=kotlin)
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=🎓%20EduAI%20Tutor&fontSize=70&fontColor=fff&animation=fadeIn&fontAlignY=38&desc=AI%20Learning%20Companion%20|%20100%25%20Offline%20|%20Privacy-First&descAlignY=60&descSize=18" alt="Header" />
 
-### 🚀 Your Personal AI-Powered Learning Companion
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=22&duration=3000&pause=1000&color=6366F1&center=true&vCenter=true&width=800&height=80&lines=On-Device+AI+Education;Privacy-First+Learning;100%25+Offline+Capability;Smart+Quiz+Generation;Progress+Tracking;Adaptive+Learning+Experience;Real-Time+AI+Tutoring;Personalized+Quizzes" alt="Features Typing SVG" />
 
-**On-Device AI Education • Privacy-First • 100% Offline**
+<br/>
 
-[Features](#-features) • [Installation](#-installation) • [How to Use](#-how-to-use) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack)
+**Version 1.0** • Android 8.0+ • Kotlin • MIT License
+
+[Features](#-features) • [Installation](#-installation) • [How to Use](#-how-to-use) • [Architecture](#️-architecture) • [Tech Stack](#️-tech-stack)
 
 </div>
 
@@ -126,8 +122,8 @@ EduAI Tutor can help you learn about any topic! Some examples include:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/EduAITutor.git
-   cd EduAITutor
+   git clone https://github.com/RohithCherukuri816/AI-Intelligence-Tutor.git
+   cd AI-Intelligence-Tutor
    ```
 
 2. **Open in Android Studio**
@@ -147,7 +143,7 @@ EduAI Tutor can help you learn about any topic! Some examples include:
 
 #### Option 2: Using APK
 
-1. Download the latest APK from [Releases](https://github.com/yourusername/EduAITutor/releases)
+1. Download the latest APK from [Releases](https://github.com/RohithCherukuri816/AI-Intelligence-Tutor/releases)
 2. Transfer to your Android device
 3. Open file manager and tap the APK to install
 4. Allow installation from unknown sources if prompted
@@ -560,8 +556,8 @@ Ready for Offline Use
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/yourusername/EduAITutor.git
-   cd EduAITutor
+   git clone https://github.com/RohithCherukuri816/AI-Intelligence-Tutor.git
+   cd AI-Intelligence-Tutor
    ```
 
 2. **Open in Android Studio**
@@ -617,9 +613,9 @@ Ready for Offline Use
 
 ### 📞 Getting Help
 
-- 📧 **Email**: support@eduaituitor.com
-- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/EduAITutor/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/EduAITutor/discussions)
+- 📧 **Email**: rohithcherukuri816@gmail.com
+- 🐛 **Issues**: [GitHub Issues](https://github.com/RohithCherukuri816/AI-Intelligence-Tutor/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/RohithCherukuri816/AI-Intelligence-Tutor/discussions)
 
 ---
 
@@ -640,17 +636,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## 🌟 Star History
 
-If you find this project useful, please ⭐ star the repository!
-
-```markdown
-⭐ Please star us on GitHub!
-↓
-Share with others
-↓
-Help us grow the community
-↓
-Better future for education
-```
+If you find this project useful, please ⭐ star the repository and share it with others to help grow the community!
 
 ---
 
@@ -672,16 +658,12 @@ Contributions are welcome! Please follow these steps:
 
 **Questions? Issues? Suggestions?**
 
-📧 [Email](rohithcherukuri816@gmail.com) •
-🐙 [GitHub](https://github.com/RohithCherukuri816/AI-Intelligence-Tutor) •
-🌐 [Portfolio](http://rohithcherukuri-portfolio.s3-website.eu-north-1.amazonaws.com/) •
+📧 [Email](mailto:rohithcherukuri816@gmail.com) • 🐙 [GitHub](https://github.com/RohithCherukuri816/AI-Intelligence-Tutor) • 🌐 [Portfolio](http://rohithcherukuri-portfolio.s3-website.eu-north-1.amazonaws.com/)
 
 ---
 
-### Made with ❤️ by [Rohith Cherukuri](https://github.com/RohithCherukuri816/)
+Made with ❤️ by [Rohith Cherukuri](https://github.com/RohithCherukuri816/)
 
-<img src="https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge" alt="Made with love">
-
-**Version 1.0** | Last Updated: 2024 | &copy; EduAI Tutor. All rights reserved.
+**Version 1.0** | Last Updated: 2024 | © EduAI Tutor. All rights reserved.
 
 </div>
